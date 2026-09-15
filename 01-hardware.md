@@ -65,9 +65,14 @@ Flash 模式 DIO 亦可启动（兼容子集，占用引脚更少）。
 | I2C SCL | IO39 | 触摸 I2C 时钟；总线复用见 2.8 | [实测+交叉] |
 | RST | IO48 | 低有效 | [实测+交叉] |
 | INT | IO47 | 低有效 | [实测+交叉] |
-| I2C 从地址 | — | 0x55 | [文档] |
+| I2C 从地址 | — | 0x55 | [实测+交叉] |
+| 同时触点数上限 | — | 5 | [实测] |
 
 触摸控制器集成于 ST77922 内部。
+
+从地址与触点数上限由控制器应答取得：复位时序（RST 拉低 100 ms 后拉高 100 ms）完成后读状态寄存器，低 4 位清零表示就绪；随后读触点数上限寄存器，返回 5。
+
+触点点帧为 7 字节：`[0]` 最高位表示该点有效、低 6 位为 X 高 6 位，`[1]` 为 X 低 8 位，`[2]` 低 6 位为 Y 高 6 位，`[3]` 为 Y 低 8 位，`[4..6]` 未使用。第 N 个点的寄存器地址为 `0x0014 + N × 7`。
 
 ### 2.3 MicroSD（SDIO 4 位）
 
@@ -91,9 +96,13 @@ Flash 模式 DIO 亦可启动（兼容子集，占用引脚更少）。
 | I2S DIN | IO16 | 数据输入（编解码 → ESP32-S3） | [实测+交叉] |
 | I2S WS/LRCK | IO21 | 左右声道选择，高=右，低=左 | [实测+交叉] |
 | 编解码 I2C | IO38 / IO39 | 与触摸共用 | [实测+交叉] |
-| 编解码从地址 | — | 0x18 | [文档] |
+| 编解码从地址 | — | 0x18 | [实测+交叉] |
 
 编解码芯片为 ES8311；功放为 8002 系列单声道音频功放，最大 1.5 W（8 Ω）或 2 W（4 Ω）。器件型号标注存在冲突，见 [`08-reference-index.md`](08-reference-index.md) 第 4 节第 6 条。
+
+编解码在 0x18 应答：完成寄存器写入序列并打开输出后，经功放驱动扬声器发声。功放使能由编解码驱动的 `pa_pin` 与 `pa_reverted` 控制，对应 IO1 低电平使能。
+
+编解码关闭流程执行静音并拉高功放使能引脚。若改用关闭再打开的方式停止输出，`esp_codec_dev` 在打开时的 `set_fmt` 会对已关闭的 I2S 通道重复调用 `i2s_channel_disable`；`esp_driver_i2s` 对该状态打错误日志。停止输出应以静音实现，不关闭编解码。
 
 ### 2.5 按键 · 串口 · USB
 
@@ -194,17 +203,16 @@ ESP32-S3 共 4 个 strapping 引脚：GPIO0、GPIO3、GPIO45、GPIO46。四者�
 
 ## 5. 板上其它外设
 
-本节各功能均未实测。
-
-| 功能 | 器件 | 厂商示例 |
-| --- | --- | --- |
-| 触摸 | ST77922 内置 | `1-示例程序_Demo/Arduino/Demo/Example_15_RGB_LED_TOUCH`、`Example_28_touch_pen`；IDF 侧 `components/esp_bsp/bsp_touch.c` |
-| 音频播放 / 录音 | ES8311 + 8002 系列功放 + MEMS 麦克风 | `Example_16_music`、`Example_17_echo` |
-| MicroSD | SDIO 4 位 | `Example_05_show_SD_jpg_picture` |
-| RGB 指示灯 | XL-5050RGBC-WS2812B | `Example_06_RGB_LED` |
-| 电池电压 | IO8 ADC | `Example_13_Get_Battery_Voltage` |
-| 背光 PWM | LEDC | `Example_14_Backlight_PWM` |
-| 按键中断 | IO0 | `Example_09_key_interrupt` |
+| 功能 | 器件 | 状态 | 厂商示例 |
+| --- | --- | --- | --- |
+| 触摸 | ST77922 内置 | 已实测 | `1-示例程序_Demo/Arduino/Demo/Example_15_RGB_LED_TOUCH`、`Example_28_touch_pen`；IDF 侧 `components/esp_bsp/bsp_touch.c` |
+| 音频播放 | ES8311 + 8002 系列功放 | 已实测 | `Example_16_music` |
+| 音频录音 | MEMS 麦克风 | 未实测 | `Example_17_echo` |
+| MicroSD | SDIO 4 位 | 未实测 | `Example_05_show_SD_jpg_picture` |
+| RGB 指示灯 | XL-5050RGBC-WS2812B | 已实测 | `Example_06_RGB_LED` |
+| 电池电压 | IO8 ADC | 部分实测 | `Example_13_Get_Battery_Voltage` |
+| 背光 PWM | LEDC | 通断已实测，调光未实测 | `Example_14_Backlight_PWM` |
+| 按键输入 | IO0 | 已实测 | `Example_09_key_interrupt` |
 
 ## 6. 引脚类勘误
 
