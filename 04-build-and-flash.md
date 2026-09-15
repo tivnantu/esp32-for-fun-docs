@@ -106,7 +106,7 @@ idf.py build
 
 首次 `set-target` 会解析 `idf_component.yml` 并下载组件至 `managed_components/`。`dependencies.lock` 记录组件解析结果，应纳入版本控制。
 
-该锁文件只锁定组件（版本与 `component_hash`），**不锁定 ESP-IDF**：其中的 `idf` 条目是约束区间，构建时组件管理器以当前 IDF 版本覆盖该条目。复现实测组合须安装第 1 节指定的 IDF 版本本身，不得以「满足组件声明区间」代替。
+该锁文件只锁定组件（版本与 `component_hash`），**不锁定 ESP-IDF**：顶层 `idf` 条目记录解析时的 IDF 版本（`source.type` 为 `idf`），构建时被当前安装的版本覆盖；`>= 5.4` 一类的区间约束只出现在各组件条目自身的 `idf` 依赖中。复现实测组合须安装第 1 节指定的 IDF 版本本身，不得以「满足组件声明区间」代替。
 
 ## 6. 烧录
 

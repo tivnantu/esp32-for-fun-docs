@@ -169,7 +169,7 @@ static const st77922_lcd_init_cmd_t lcd_init_cmds[] = {
 | `vendor_config.flags.use_qspi_interface` | 1 | [实测+交叉] |
 | `vendor_config.init_cmds` | 第 4.2 节序列 | [实测+交叉] |
 | `data_endian` | 不适用，见第 6 节 | [实测+交叉] |
-| `max_transfer_sz`（总线配置） | 不得小于单次传输的最大字节数。基准实现取 `320 × 80 × 2 = 51,200 B` | [实测+交叉] |
+| `max_transfer_sz`（总线配置） | 不得小于单次传输的最大字节数。基准实现（定义见 [`README.md`](README.md)「术语」）取 `320 × 80 × 2 = 51,200 B` | [实测+交叉] |
 
 `ST77922_PANEL_IO_QSPI_CONFIG` 宏的 `pclk_hz` 默认值为 40 MHz，必须显式覆盖为 80 MHz。
 

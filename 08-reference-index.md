@@ -71,6 +71,7 @@ Espressif 官方烧录工具不在此目录，另见 `https://dl.espressif.com/p
 3-尺寸图_Structure_Diagram/  尺寸图与 STEP 模型
 4-数据手册_DataSheet/        ST77922、ES8311、TP4054、音频功放、WS2812B、
                             MEMS 麦克风、ESP32-S3 数据手册与硬件设计指南
+                            （另含与本模块无关的 FT6336G 数据手册，见 3.2 节）
 5-原理图_Schematic/          原理图与 IO 资源分配表
 6-用户手册_User_Manual/      用户手册中英文版
 7-工具软件_Tool_software/    通用工具
@@ -91,9 +92,15 @@ Espressif 官方烧录工具不在此目录，另见 `https://dl.espressif.com/p
 | `4-数据手册_DataSheet/ST77922 TDDI Interface Protocol V01.00.pdf` | TDDI 接口协议 |
 | `5-原理图_Schematic/ESP32-S3原理图.pdf` | 引脚、网络与器件型号依据 |
 
-### 3.2 示例工程
+### 3.2 资料包内不适用文件
 
-Arduino 侧：20 个依赖库，29 个示例，覆盖显示（`Example_01`–`08`）、触摸（`15`、`28`）、音频（`16`、`17`）、WiFi（`18`–`24`）、BLE（`25`、`26`）、RGB 指示灯（`06`）、背光 PWM（`14`）、电池（`13`）、SD 卡（`05`）。
+| 文件 | 原因 |
+| --- | --- |
+| `4-数据手册_DataSheet/D-FT6336G-DataSheet-V1.0.pdf` | FT6336G 为独立电容触摸控制器，使用自己的 I2C 从地址（非本模块的 0x55）。本模块的触摸控制器集成于 ST77922 内部，见 [`01-hardware.md`](01-hardware.md) 第 2.2 节。该文件与本模块无关，属资料包遗留；按 FT6336G 设计会得到错误的总线与从地址 |
+
+### 3.3 示例工程
+
+Arduino 侧：17 个依赖库（`Install libraries/` 下的目录数，与厂商 `3.5inch_arduino示例程序说明.pdf` 第 3.2 节逐条列出的库一致），29 个示例，覆盖显示（`Example_01`–`08`）、触摸（`15`、`28`）、音频（`16`、`17`）、WiFi（`18`–`24`）、BLE（`25`、`26`）、RGB 指示灯（`06`）、背光 PWM（`14`）、电池（`13`）、SD 卡（`05`）。
 
 ESP-IDF 侧：`3.5inch_ESP32-S3_LVGL`，含自研 `components/esp_lv_port` 与 `components/esp_bsp`。
 
